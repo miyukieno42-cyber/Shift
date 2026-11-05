@@ -48,9 +48,15 @@ async function api(method, key, value){
   var r = await fetch('/api/data?key=' + encodeURIComponent(key), opt);
   if (r.status === 401) { var e = new Error('auth'); e.auth = true; throw e; }
   if (!r.ok) {
-    var msg = 'http ' + r.status;
-    try { var j = await r.json(); if (j && j.error) msg = j.error; } catch(x) {}
-    throw new Error(msg);
+    var msg = 'http ' + r.status, miss = '';
+    try {
+      var j = await r.json();
+      if (j && j.error) msg = j.error;
+      if (j && j.missing) miss = j.missing.join('、');
+    } catch(x) {}
+    var er = new Error(msg);
+    er.missing = miss;
+    throw er;
   }
   return r.json();
 }
@@ -124,7 +130,7 @@ async function start(){
     if (pending.size === 0) setStatus('');
   } catch (e) {
     if (e.auth) showLogin('パスワードが違います');
-    else if (e.message === 'env') showLogin('サーバーの設定が足りません(Vercelの環境変数を確認してください)');
+    else if (e.message === 'env') showLogin('サーバーの設定が足りません: ' + (e.missing || '') + '(Vercelの設定を確認してください)');
     else showLogin('読み込めませんでした。通信を確認して、もう一度開いてください。');
   }
 }
