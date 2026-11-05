@@ -13,8 +13,6 @@ var DEFAULT_STAFF = ['白井さん','葉山さん','ゆいちゃん','かじさ�
 var WD = ['日','月','火','水','木','金','土'];
 
 /* ---------- 状態 ---------- */
-var pw = '';
-try { pw = localStorage.getItem('shift_pw') || ''; } catch(e) {}
 var now = new Date();
 var ym = {y: now.getFullYear(), m: now.getMonth() + 1};
 var staff = [];
@@ -40,7 +38,7 @@ function isToday(d){ return now.getFullYear() === ym.y && now.getMonth() + 1 ===
 
 /* ---------- API ---------- */
 async function api(method, key, value){
-  var opt = {method: method, headers: {'x-app-password': encodeURIComponent(pw)}};
+  var opt = {method: method, headers: {}};
   if (value !== undefined) {
     opt.headers['Content-Type'] = 'application/json';
     opt.body = JSON.stringify({value: value});
@@ -83,7 +81,6 @@ async function flush(){
     if (pending.size === 0) setStatus('保存しました');
   } catch (e) {
     items.forEach(function(it){ if (!pending.has(it[0])) pending.set(it[0], it[1]); });
-    if (e.auth) { showLogin('パスワードが違います'); return; }
     setStatus('保存できません(タップでやり直し)', 'err');
   }
 }
@@ -115,39 +112,23 @@ function showLogin(msg){
   $('#app').hidden = true;
   $('#login').hidden = false;
   $('#loginErr').textContent = msg || '';
-  $('#pwInput').value = '';
 }
 function showApp(){
   $('#login').hidden = true;
   $('#app').hidden = false;
 }
 async function start(){
-  if (!pw) { showLogin(''); return; }
   try {
     await loadAll();
     showApp();
     renderAll();
     if (pending.size === 0) setStatus('');
   } catch (e) {
-    if (e.auth) showLogin('パスワードが違います');
-    else if (e.message === 'env') showLogin('サーバーの設定が足りません: ' + (e.missing || '') + '(Vercelの設定を確認してください)');
+    if (e.message === 'env') showLogin('サーバーの設定が足りません: ' + (e.missing || '') + '(Vercelの設定を確認してください)');
     else showLogin('読み込めませんでした。通信を確認して、もう一度開いてください。');
   }
 }
-$('#loginBtn').addEventListener('click', function(){
-  var v = $('#pwInput').value.trim();
-  if (!v) return;
-  pw = v;
-  try { localStorage.setItem('shift_pw', pw); } catch(e) {}
-  start();
-});
-$('#pwInput').addEventListener('keydown', function(e){ if (e.key === 'Enter') $('#loginBtn').click(); });
-$('#logout').addEventListener('click', async function(){
-  await flush();
-  try { localStorage.removeItem('shift_pw'); } catch(e) {}
-  pw = '';
-  showLogin('');
-});
+$('#loginBtn').addEventListener('click', function(){ location.reload(); });
 
 document.querySelectorAll('.tabs button').forEach(function(b){
   b.addEventListener('click', function(){
