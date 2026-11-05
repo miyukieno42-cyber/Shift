@@ -1,6 +1,4 @@
 // シフトデータの保存・読み込みAPI(Upstash Redisに保存します)
-const crypto = require('crypto');
-
 // 環境変数の名前が KV_ / UPSTASH_ / STORAGE_ など何で始まっていても見つけます
 function pickEnv(re) {
   const name = Object.keys(process.env).find(
@@ -10,7 +8,6 @@ function pickEnv(re) {
 }
 const REDIS_URL = pickEnv(/(REST_API_URL|REST_URL)$/);
 const REDIS_TOKEN = pickEnv(/(REST_API_TOKEN|REST_TOKEN)$/);
-const APP_PASSWORD = process.env.APP_PASSWORD;
 
 async function redis(command) {
   const r = await fetch(REDIS_URL, {
@@ -26,29 +23,13 @@ async function redis(command) {
   return json.result;
 }
 
-function samePassword(sent) {
-  let decoded = '';
-  try {
-    decoded = decodeURIComponent(String(sent || ''));
-  } catch (e) {
-    return false;
-  }
-  const a = Buffer.from(decoded);
-  const b = Buffer.from(String(APP_PASSWORD));
-  return a.length === b.length && crypto.timingSafeEqual(a, b);
-}
-
 module.exports = async (req, res) => {
   res.setHeader('Cache-Control', 'no-store');
 
   const missing = [];
-  if (!APP_PASSWORD) missing.push('APP_PASSWORD(パスワード)');
   if (!REDIS_URL || !REDIS_TOKEN) missing.push('データベース(Upstash Redis)の接続');
   if (missing.length) {
     return res.status(500).json({ error: 'env', missing });
-  }
-  if (!samePassword(req.headers['x-app-password'])) {
-    return res.status(401).json({ error: 'auth' });
   }
 
   const key = String((req.query && req.query.key) || '');
