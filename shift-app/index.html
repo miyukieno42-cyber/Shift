@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#0f6b73">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="シフト">
+<title>シフト管理</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div id="login" hidden>
+  <div class="login-box">
+    <h1>シフト管理</h1>
+    <p>パスワードを入力してください</p>
+    <input id="pwInput" type="password" autocomplete="current-password" aria-label="パスワード">
+    <p class="err" id="loginErr"></p>
+    <button class="primary" id="loginBtn">開く</button>
+  </div>
+</div>
+
+<div id="app" hidden>
+  <header>
+    <div class="bar">
+      <h1>シフト管理</h1>
+      <button class="status" id="status" type="button" aria-live="polite"></button>
+    </div>
+    <div class="monthnav">
+      <button id="prev" aria-label="前の月">‹</button>
+      <div class="label" id="monthLabel"></div>
+      <button id="today">今月</button>
+      <button id="next" aria-label="次の月">›</button>
+    </div>
+    <div class="tabs" role="tablist">
+      <button role="tab" data-tab="grid" aria-selected="true">シフト入力</button>
+      <button role="tab" data-tab="cal" aria-selected="false">カレンダー</button>
+      <button role="tab" data-tab="staff" aria-selected="false">従業員</button>
+    </div>
+  </header>
+
+  <main>
+    <section id="view-grid">
+      <div class="legend" id="legend"></div>
+      <div class="hint">マスをタップして選びます。日付をタップすると、その日を休業日にできます。</div>
+      <div class="gridwrap" id="gridWrap"></div>
+      <button class="ghost goto-staff" id="gotoStaff">従業員を追加・削除する</button>
+    </section>
+
+    <section id="view-cal" hidden>
+      <div class="hint">「出勤」に選んだ人が表示されます。</div>
+      <div class="cal" id="cal"></div>
+    </section>
+
+    <section id="view-staff" hidden>
+      <h2 class="sec">従業員の追加・削除</h2>
+      <div class="card">
+        <div class="add">
+          <input id="newName" placeholder="追加する人の名前" aria-label="追加する人の名前">
+          <button class="primary" id="addBtn">追加</button>
+        </div>
+      </div>
+      <div class="hint">名前の変更はそのまま書き換えます。↑↓で並べ替え、「削除」でやめた人を消せます。</div>
+      <div class="card">
+        <div id="staffList"></div>
+      </div>
+      <button class="ghost logout" id="logout">ログアウト</button>
+    </section>
+  </main>
+</div>
+
+<div class="sheet-bg" id="sheetBg" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
+    <h3 id="sheetTitle"></h3>
+    <p id="sheetSub"></p>
+    <div class="opts" id="opts"></div>
+    <button class="ghost close" id="sheetClose">閉じる</button>
+  </div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
